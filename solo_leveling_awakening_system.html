@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- إعدادات تحويل الموقع إلى تطبيق جوال مستقل (PWA / Web App) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Solo System">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#050a14">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23050a14'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='%2300d2ff' font-family='sans-serif' font-weight='bold'>S</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23050a14'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='%2300d2ff' font-family='sans-serif' font-weight='bold'>S</text></svg>">
+    <title>نظام الإيقاظ الواقعي | Solo Leveling System</title>
+    <!-- استيراد Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- استيراد خط Cairo العربي العصري -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* إعدادات الخطوط والألوان الأساسية المستوحاة من واجهة النظام */
+        :root {
+            --sys-primary: #00d2ff;
+            --sys-secondary: #3a7bd5;
+            --sys-accent: #9d4edd;
+            --sys-bg: #050a14;
+            --sys-panel: rgba(10, 22, 42, 0.85);
+            --sys-border: rgba(0, 210, 255, 0.45);
+            --sys-glow: 0 0 18px rgba(0, 210, 255, 0.45), inset 0 0 12px rgba(0, 210, 255, 0.15);
+        }
+
+        /* وضع العقوبة (Red Alert Mode) */
+        body.penalty-mode {
+            --sys-primary: #ff2a55;
+            --sys-secondary: #990022;
+            --sys-accent: #ff5e00;
+            --sys-bg: #140407;
+            --sys-panel: rgba(35, 8, 14, 0.9);
+            --sys-border: rgba(255, 42, 85, 0.65);
+            --sys-glow: 0 0 25px rgba(255, 42, 85, 0.65), inset 0 0 18px rgba(255, 42, 85, 0.25);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--sys-bg);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(157, 78, 221, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(0, 210, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+        }
+
+        body.penalty-mode {
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 42, 85, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(255, 42, 85, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 42, 85, 0.05) 1px, transparent 1px);
+        }
+
+        .font-cyber {
+            font-family: 'Orbitron', 'Cairo', sans-serif;
+        }
+
+        /* نافذة النظام الهولوغرامية */
+        .system-window {
+            background: var(--sys-panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--sys-border);
+            box-shadow: var(--sys-glow);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        /* زوايا هولوغرامية مضيئة */
+        .system-window::before, .system-window::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: var(--sys-primary);
+            border-style: solid;
+            pointer-events: none;
+            transition: border-color 0.4s ease;
+        }
+        .system-window::before {
+            top: -2px;
+            right: -2px;
+            border-width: 2px 2px 0 0;
+        }
+        .system-window::after {
+            bottom: -2px;
+            left: -2px;
+            border-width: 0 0 2px 2px;
+        }
+
+        /* نصوص متوهجة */
+        .text-glow {
+            color: var(--sys-primary);
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
+            transition: color 0.4s ease, text-shadow 0.4s ease;
+        }
+        body.penalty-mode .text-glow {
+            text-shadow: 0 0 12px rgba(255, 42, 85, 0.8);
+        }
+
+        /* أزرار النظام */
+        .sys-btn {
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.15), rgba(58, 123, 213, 0.25));
+            border: 1px solid var(--sys-primary);
+            color: #fff;
+            text-shadow: 0 0 6px var(--sys-primary);
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.25);
+            transition: all 0.25s ease;
+        }
+        .sys-btn:hover:not(:disabled) {
+            background: var(--sys-primary);
+            color: #050a14;
+            font-weight: 700;
+            box-shadow: 0 0 20px var(--sys-primary);
+            transform: translateY(-1px);
+        }
+        .sys-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        body.penalty-mode .sys-btn {
+            background: linear-gradient(135deg, rgba(255, 42, 85, 0.2), rgba(153, 0, 34, 0.35));
+            border-color: #ff2a55;
+            box-shadow: 0 0 12px rgba(255, 42, 85, 0.35);
+        }
+        body.penalty-mode .sys-btn:hover:not(:disabled) {
+            background: #ff2a55;
+            color: #fff;
+            box-shadow: 0 0 22px #ff2a55;
+        }
+
+        /* شريط التقدم المضيء */
+        .xp-bar-fill {
+            background: linear-gradient(90deg, var(--sys-secondary), var(--sys-primary));
+            box-shadow: 0 0 12px var(--sys-primary);
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* مربع الاختيار المخصص للمهام */
+        .quest-checkbox {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--sys-primary);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .quest-checkbox:checked {
+            background: var(--sys-primary);
+            box-shadow: 0 0 10px var(--sys-primary);
+        }
+        .quest-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #050a14;
+            font-weight: 900;
+            font-size: 14px;
+        }
+        body.penalty-mode .quest-checkbox:checked::after {
+            color: #fff;
+        }
+
+        /* حركة نبض التحذير */
+        @keyframes pulseAlert {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 42, 85, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(255, 42, 85, 0.85); }
+        }
+        .alert-pulse {
+            animation: pulseAlert 2s infinite;
+        }
+
+        /* حركة ظهور النوافذ */
+        @keyframes holographicIn {
+            0% { opacity: 0; transform: scale(0.94) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-holo {
+            animation: holographicIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 md:p-8 flex flex-col items-center justify-start">
+
+    <!-- شريط التنبيه العلوي للنظام (إشعارات داخلية بديلة لـ alert) -->
+    <div id="system-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden max-w-md w-[92%] system-window rounded-xl px-4 py-3 text-center shadow-2xl animate-holo">
+        <div class="flex items-center justify-center gap-2 font-bold text-sm sm:text-base">
+            <i id="toast-icon" class="fas fa-exclamation-circle text-glow"></i>
+            <span id="toast-message">إشعار النظام</span>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 1. شاشة تسجيل الدخول / إيقاظ الصياد (Login & Awakening Setup)         -->
+    <!-- ===================================================================== -->
+    <div id="auth-screen" class="w-full max-w-lg my-auto py-8 animate-holo">
+        <div class="system-window rounded-2xl p-6 sm:p-8">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-cyan-400/50 bg-cyan-950/40 mb-3 shadow-[0_0_20px_rgba(0,210,255,0.3)]">
+                    <i class="fas fa-dragon text-3xl text-glow"></i>
+                </div>
+                <p class="text-xs tracking-widest uppercase text-cyan-400/80 font-cyber mb-1">[ SYSTEM NOTIFICATION ]</p>
+                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-wide">
+                    نظام <span class="text-glow">الإيقاظ الواقعي</span>
+                </h1>
+                <p class="text-slate-400 text-sm mt-2">لقد تم اختيارك لتصبح "لاعباً". هل تملك الشجاعة لقبول المهمة ورفع مستواك؟</p>
+            </div>
+
+            <form id="awakening-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-cyan-300 mb-1.5">اسم الصياد (Hunter Name)</label>
+                    <input type="text" id="hunter-name-input" required maxlength="24" placeholder="أدخل اسمك أو لقبك..."
+                        class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_12px_rgba(0,210,255,0.3)] transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-cyan-300 mb-2">تقييم القدرة البدنية الأولية (اختيار المستوى)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fitness-tier" value="beginner" checked class="peer sr-only">
+                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-cyan-400 peer-checked:bg-cyan-950/50 peer-checked:shadow-[0_0_12px_rgba(0,210,255,0.3)] transition text-center">
+                                <div class="font-bold text-white text-sm">مبتدئ</div>
+                                <div class="text-xs text-cyan-400 font-cyber mt-0.5">Level 1</div>
+                                <div class="text-[11px] text-slate-400 mt-1">تدرج آمن للمبتدئين</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fitness-tier" value="intermediate" class="peer sr-only">
+                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-cyan-400 peer-checked:bg-cyan-950/50 peer-checked:shadow-[0_0_12px_rgba(0,210,255,0.3)] transition text-center">
+                                <div class="font-bold text-white text-sm">متوسط</div>
+                                <div class="text-xs text-cyan-400 font-cyber mt-0.5">Level 12</div>
+                                <div class="text-[11px] text-slate-400 mt-1">لياقة بدنية جيدة</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fitness-tier" value="advanced" class="peer sr-only">
+                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-cyan-400 peer-checked:bg-cyan-950/50 peer-checked:shadow-[0_0_12px_rgba(0,210,255,0.3)] transition text-center">
+                                <div class="font-bold text-white text-sm">متقدم</div>
+                                <div class="text-xs text-cyan-400 font-cyber mt-0.5">Level 28</div>
+                                <div class="text-[11px] text-slate-400 mt-1">تحدٍ عالي الكثافة</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full sys-btn py-3.5 rounded-xl font-bold text-base tracking-wide flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fas fa-bolt"></i>
+                    <span>قبول الإيقاظ وبدء النظام</span>
+                </button>
+            </form>
+
+            <!-- استعادة حساب موجود مسبقاً إن وجد -->
+            <div id="existing-account-box" class="hidden mt-5 pt-4 border-t border-slate-800 text-center">
+                <p class="text-xs text-slate-400 mb-2">تم العثور على سجل صياد محفوظ على هذا الجهاز:</p>
+                <button id="resume-session-btn" type="button" class="text-sm font-bold text-cyan-400 hover:text-cyan-300 underline cursor-pointer">
+                    متابعة التقدم كـ <span id="saved-hunter-preview"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 2. لوحة تحكم النظام الرئيسية (Main Hunter System Dashboard)           -->
+    <!-- ===================================================================== -->
+    <div id="dashboard-screen" class="hidden w-full max-w-6xl space-y-6 animate-holo">
+        
+        <!-- الشريط العلوي (Header) -->
+        <header class="system-window rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl border border-current text-glow flex items-center justify-center bg-slate-950/60">
+                    <i class="fas fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-cyber tracking-wider opacity-75">PLAYER STATUS</span>
+                        <span id="penalty-badge" class="hidden px-2 py-0.5 text-[10px] font-bold bg-red-600 text-white rounded animate-pulse">وضع العقوبة نشط!</span>
+                    </div>
+                    <h1 class="text-lg sm:text-xl font-black text-white">نظام التدريب الواقعي <span class="text-glow text-sm font-cyber">v2.0</span></h1>
+                </div>
+            </div>
+
+            <!-- أزرار التحكم بالصوت والحساب -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="sound-toggle-btn" title="تفعيل/كتم المؤثرات الصوتية" class="p-2.5 rounded-xl border border-slate-700 hover:border-cyan-400/60 bg-slate-900/70 text-slate-300 transition cursor-pointer">
+                    <i id="sound-icon" class="fas fa-volume-up"></i>
+                </button>
+                <button id="logout-btn" title="تبديل الحساب / تسجيل الخروج" class="px-3 py-2 rounded-xl border border-slate-700 hover:border-cyan-400/60 bg-slate-900/70 text-xs sm:text-sm text-slate-300 flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج</span>
+                </button>
+                <button id="reset-account-btn" title="إعادة ضبط التقدم بالكامل" class="px-3 py-2 rounded-xl border border-red-900/60 hover:border-red-500 bg-red-950/30 text-xs sm:text-sm text-red-400 flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fas fa-rotate-left"></i>
+                    <span class="hidden sm:inline">إعادة ضبط</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- الشبكة الرئيسية: العمود الأيمن (بطاقة الصياد والرتب) + العمود الأيسر (المهام والعقوبات) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- العمود الأيمن: حالة الصياد والإحصائيات والرتب (5 أعمدة) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- بطاقة حالة الصياد (Hunter Status Window) -->
+                <section class="system-window rounded-2xl p-5 sm:p-6">
+                    <div class="flex items-center justify-between border-b border-slate-700/70 pb-3 mb-4">
+                        <span class="text-xs font-cyber tracking-widest text-glow font-bold">[ STATUS WINDOW ]</span>
+                        <span class="text-xs text-slate-400">سلسلة الالتزام: <strong id="streak-count" class="text-white">0</strong> أيام 🔥</span>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <div class="text-xs text-slate-400">اسم الصياد</div>
+                            <h2 id="display-name" class="text-2xl font-black text-white mt-0.5">سونغ جين وو</h2>
+                            <div id="display-title" class="text-xs font-bold text-glow mt-1">مواطن عادي</div>
+                        </div>
+
+                        <!-- شارة الرتبة والمستوى -->
+                        <div class="text-center bg-slate-950/80 border border-current text-glow rounded-2xl px-4 py-2.5 min-w-[95px]">
+                            <div class="text-[10px] font-cyber opacity-80">RANK</div>
+                            <div id="display-rank" class="text-3xl font-black font-cyber leading-none my-1">E</div>
+                            <div class="text-xs font-bold text-white font-cyber">LVL <span id="display-level">1</span></div>
+                        </div>
+                    </div>
+
+                    <!-- شريط تقدم نقاط الخبرة (XP Bar) -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs font-bold mb-1.5">
+                            <span class="text-slate-300">نقاط الخبرة (XP)</span>
+                            <span class="font-cyber text-glow"><span id="current-xp">0</span> / <span id="required-xp">500</span></span>
+                        </div>
+                        <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-700/80 p-0.5">
+                            <div id="xp-progress-bar" class="xp-bar-fill h-full rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- الإحصائيات الأربعة (Attributes) -->
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">السمات والقدرات (Attributes)</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-fist-raised text-rose-400"></i>
+                                    <div>
+                                        <div class="text-xs text-slate-400">القوة</div>
+                                        <div class="text-[10px] font-cyber text-slate-500">STR</div>
+                                    </div>
+                                </div>
+                                <span id="stat-str" class="text-xl font-black font-cyber text-white">10</span>
+                            </div>
+
+                            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-heart-pulse text-emerald-400"></i>
+                                    <div>
+                                        <div class="text-xs text-slate-400">التحمل</div>
+                                        <div class="text-[10px] font-cyber text-slate-500">END</div>
+                                    </div>
+                                </div>
+                                <span id="stat-end" class="text-xl font-black font-cyber text-white">10</span>
+                            </div>
+
+                            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-wind text-cyan-400"></i>
+                                    <div>
+                                        <div class="text-xs text-slate-400">الرشاقة</div>
+                                        <div class="text-[10px] font-cyber text-slate-500">AGI</div>
+                                    </div>
+                                </div>
+                                <span id="stat-agi" class="text-xl font-black font-cyber text-white">10</span>
+                            </div>
+
+                            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-brain text-purple-400"></i>
+                                    <div>
+                                        <div class="text-xs text-slate-400">الإرادة</div>
+                                        <div class="text-[10px] font-cyber text-slate-500">INT</div>
+                                    </div>
+                                </div>
+                                <span id="stat-int" class="text-xl font-black font-cyber text-white">10</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- جدول تصنيف الرتب (Hunter Ranks Progression) -->
+                <section class="system-window rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-ranking-star text-glow"></i>
+                            <span>سلم رتب الصيادين (Ranks)</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-400">التدرج التلقائي</span>
+                    </div>
+                    <div id="ranks-list" class="space-y-2 text-xs">
+                        <!-- يتم تعبئتها ديناميكياً عبر JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- العمود الأيسر: المهام اليومية ونافذة العقوبات (7 أعمدة) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- نافذة زنزانة العقوبة (تظهر فقط عند تفعيل العقوبة) -->
+                <section id="penalty-zone-panel" class="hidden system-window alert-pulse rounded-2xl p-5 sm:p-6 border-2 border-red-500">
+                    <div class="flex items-center gap-3 text-red-400 mb-3">
+                        <i class="fas fa-skull-crossbones text-2xl animate-bounce"></i>
+                        <div>
+                            <div class="text-xs font-cyber tracking-widest uppercase">WARNING: PENALTY ZONE ACTIVATED</div>
+                            <h2 class="text-xl font-black text-white">تم نقلك إلى زنزانة العقوبة!</h2>
+                        </div>
+                    </div>
+                    <p class="text-sm text-red-200/90 mb-4 leading-relaxed">
+                        لقد فشلت في إتمام المهام اليومية في الوقت المحدد. تم خصم <strong class="text-white">50 XP</strong>، ولن يعود النظام للعمل بشكل طبيعي حتى تنجو وتكمل مهام العقوبة الإلزامية (مضاعفة الضغط والسكوات بنسبة 50%):
+                    </p>
+
+                    <div id="penalty-tasks-container" class="space-y-2.5 mb-5">
+                        <!-- مهام العقوبة الديناميكية -->
+                    </div>
+
+                    <button id="complete-penalty-btn" disabled class="w-full sys-btn py-3 rounded-xl font-bold text-sm sm:text-base cursor-pointer">
+                        إتمام عقوبة البقاء والعودة للنظام الطبيعي
+                    </button>
+                </section>
+
+                <!-- نافذة المهام اليومية (Daily Quest - Awakening Training) -->
+                <section id="daily-quest-panel" class="system-window rounded-2xl p-5 sm:p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/70 pb-4 mb-5">
+                        <div>
+                            <span class="text-xs font-cyber tracking-widest text-glow font-bold">[ DAILY QUEST: AWAKENING ]</span>
+                            <h2 class="text-xl font-black text-white mt-0.5">التدريب اليومي لإعداد الجسد</h2>
+                        </div>
+
+                        <!-- العداد التنازلي حتى منتصف الليل -->
+                        <div class="bg-slate-950/90 border border-slate-700 rounded-xl px-3.5 py-2 text-center">
+                            <div class="text-[10px] text-slate-400">الوقت المتبقي حتى العقوبة</div>
+                            <div id="countdown-timer" class="text-base sm:text-lg font-black font-cyber text-glow tracking-wider">00:00:00</div>
+                        </div>
+                    </div>
+
+                    <!-- شريط إنجاز المهام اليومية -->
+                    <div class="mb-5">
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="text-slate-300 font-semibold">نسبة إنجاز مهام اليوم</span>
+                            <span id="quest-completion-text" class="font-bold text-glow">0 / 8 مكتملة</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div id="quest-progress-bar" class="xp-bar-fill h-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- القسم الأول: التمارين البدنية المتوازنة -->
+                    <div class="mb-5">
+                        <h3 class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fas fa-dumbbell"></i>
+                            <span>التدريب البدني المتوازن (يتدرج حسب مستواك)</span>
+                        </h3>
+                        <div id="physical-quests-list" class="space-y-2.5">
+                            <!-- يتم توليد التمارين تلقائياً حسب مستوى الصياد -->
+                        </div>
+                    </div>
+
+                    <!-- القسم الثاني: مهام نمط الحياة والاستشفاء -->
+                    <div class="mb-6">
+                        <h3 class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fas fa-sparkles"></i>
+                            <span>مهام الاستشفاء وتطوير الذات (نقاط XP فورية)</span>
+                        </h3>
+                        <div id="lifestyle-quests-list" class="space-y-2.5">
+                            <!-- يتم توليد مهام نمط الحياة هنا -->
+                        </div>
+                    </div>
+
+                    <!-- زر إتمام المهمة اليومية -->
+                    <div class="pt-2 border-t border-slate-800 space-y-3">
+                        <button id="claim-daily-btn" disabled class="w-full sys-btn py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fas fa-award text-lg"></i>
+                            <span id="claim-btn-text">أكمل جميع المهام لاستلام المكافأة (+150 XP)</span>
+                        </button>
+
+                        <!-- أدوات المحاكاة والاختبار للمستخدم -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+                            <button id="new-day-btn" type="button" class="flex-1 py-2 px-3 rounded-xl border border-slate-700 hover:border-cyan-400/50 bg-slate-900/60 text-xs text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                <i class="fas fa-forward-step text-cyan-400"></i>
+                                <span>يوم جديد (Reset Daily Quests)</span>
+                            </button>
+                            <button id="simulate-fail-btn" type="button" class="flex-1 py-2 px-3 rounded-xl border border-red-900/50 hover:border-red-500/70 bg-red-950/20 text-xs text-red-300 hover:text-red-200 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                <i class="fas fa-clock text-red-400"></i>
+                                <span>محاكاة انتهاء الوقت (تفعيل العقوبة)</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 3. نافذة منبثقة لرفع المستوى (Level Up Holographic Modal)             -->
+    <!-- ===================================================================== -->
+    <div id="levelup-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="system-window rounded-2xl max-w-md w-full p-6 sm:p-8 text-center animate-holo">
+            <div class="text-xs font-cyber tracking-[0.25em] text-cyan-400 mb-2">[ SYSTEM ALERT ]</div>
+            <div class="w-20 h-20 mx-auto rounded-full border-2 border-cyan-400 flex items-center justify-center bg-cyan-950/50 shadow-[0_0_30px_rgba(0,210,255,0.6)] mb-4">
+                <i class="fas fa-angles-up text-4xl text-glow"></i>
+            </div>
+            <h2 class="text-3xl font-black text-white mb-1">ارتفع مستواك!</h2>
+            <p class="text-lg font-cyber font-bold text-glow mb-4">LEVEL UP! (<span id="modal-old-lvl">1</span> ➔ <span id="modal-new-lvl">2</span>)</p>
+            
+            <div class="bg-slate-950/80 border border-cyan-500/30 rounded-xl p-4 mb-6 text-sm space-y-1.5">
+                <div class="text-slate-300">تمت ترقية جميع قدراتك البدنية والذهنية:</div>
+                <div class="font-cyber text-cyan-300 font-bold">+2 STR | +2 END | +2 AGI | +2 INT</div>
+                <div id="modal-rank-up-msg" class="hidden text-amber-400 font-bold pt-1">
+                    🎉 تهانينا! لقد ارتقيت إلى الرتبة: <span id="modal-new-rank"></span>
+                </div>
+            </div>
+
+            <button id="close-levelup-btn" class="w-full sys-btn py-3 rounded-xl font-bold cursor-pointer">
+                مواصلة التدريب
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- منطق البرمجة والتفاعلية (JavaScript Application Logic)                -->
+    <!-- ===================================================================== -->
+    <script>
+        // ---------------------------------------------------------------------
+        // 1. تعريف الثوابت وهيكلة الرتب والمهام
+        // ---------------------------------------------------------------------
+        const RANKS_DATA = [
+            { rank: 'E', minLvl: 1, maxLvl: 10, title: 'مواطن عادي (مستيقظ حديثاً)', color: 'text-slate-300' },
+            { rank: 'D', minLvl: 11, maxLvl: 25, title: 'صياد مبتدئ', color: 'text-emerald-400' },
+            { rank: 'C', minLvl: 26, maxLvl: 50, title: 'صياد محترف', color: 'text-cyan-400' },
+            { rank: 'B', minLvl: 51, maxLvl: 75, title: 'صياد نخبة', color: 'text-blue-400' },
+            { rank: 'A', minLvl: 76, maxLvl: 90, title: 'قائد فرقة هجومية', color: 'text-purple-400' },
+            { rank: 'S', minLvl: 91, maxLvl: 100, title: 'ملك الظلال (Shadow Monarch)', color: 'text-amber-400' }
+        ];
+
+        const STORAGE_KEY = 'solo_leveling_system_v2';
+
+        // الحالة الافتراضية للاعب
+        let state = {
+            isLoggedIn: false,
+            soundEnabled: true,
+            hunter: {
+                name: '',
+                level: 1,
+                xp: 0,
+                streak: 0,
+                stats: { str: 10, end: 10, agi: 10, int: 10 }
+            },
+            daily: {
+                dateString: new Date().toDateString(),
+                completedIds: [],
+                claimedBonus: false
+            },
+            penalty: {
+                active: false,
+                completedIds: []
+            }
+        };
+
+        // ---------------------------------------------------------------------
+        // 2. نظام المؤثرات الصوتية (Web Audio API - بدون روابط خارجية)
+        // ---------------------------------------------------------------------
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.15, delay = 0) {
+                if (!state.soundEnabled) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + delay);
+                    osc.stop(this.ctx.currentTime + delay + duration);
+                } catch (e) { /* تجاهل قيود المتصفح قبل التفاعل */ }
+            },
+            playCheck() {
+                this.playTone(580, 'sine', 0.12, 0);
+                this.playTone(880, 'sine', 0.18, 0.07);
+            },
+            playLevelUp() {
+                this.playTone(440, 'triangle', 0.18, 0);
+                this.playTone(554.37, 'triangle', 0.18, 0.12);
+                this.playTone(659.25, 'triangle', 0.2, 0.24);
+                this.playTone(880, 'sine', 0.45, 0.36);
+            },
+            playAlert() {
+                this.playTone(180, 'sawtooth', 0.25, 0);
+                this.playTone(140, 'sawtooth', 0.35, 0.22);
+            }
+        };
+
+        // ---------------------------------------------------------------------
+        // 3. دوال الحساب والتدرج العلمي للتمارين (Progressive Overload)
+        // ---------------------------------------------------------------------
+        function getRequiredXP(level) {
+            return level * 500;
+        }
+
+        function getRankInfo(level) {
+            return RANKS_DATA.find(r => level >= r.minLvl && level <= r.maxLvl) || RANKS_DATA[RANKS_DATA.length - 1];
+        }
+
+        // توليد أرقام التمارين ديناميكياً بناءً على مستوى اللاعب
+        function getDynamicQuests(level) {
+            // معامل التدرج الآمن
+            const pushups = Math.min(100, 15 + Math.floor(level * 1.1));
+            const pullups = Math.min(45, 6 + Math.floor(level * 0.45));
+            const squats = Math.min(120, 20 + Math.floor(level * 1.3));
+            const plankSec = Math.min(180, 40 + Math.floor(level * 1.5));
+            const cardioMin = Math.min(45, 20 + Math.floor(level * 0.3));
+
+            return {
+                physical: [
+                    { id: 'q_push', title: `تمرين الضغط (Push-ups): ${pushups} تكرار`, desc: 'مقسمة على 3-4 مجموعات لتقوية الصدر والأكتاف', xp: 25, stat: 'str', targetCount: pushups },
+                    { id: 'q_pull', title: `تمارين السحب / العقلة (Pull-ups/Rows): ${pullups} تكرار`, desc: 'لموازنة عضلات الظهر وحماية المفاصل', xp: 25, stat: 'str', targetCount: pullups },
+                    { id: 'q_squat', title: `تمرين السكوات (Squats): ${squats} تكرار`, desc: 'لتقوية عضلات الأرجل والجذع السفلي', xp: 25, stat: 'end', targetCount: squats },
+                    { id: 'q_plank', title: `تمرين البلانك (Plank): ${plankSec} ثانية`, desc: 'ثبات كامل لعضلات البطن والعمود الفقري', xp: 20, stat: 'end', targetCount: plankSec },
+                    { id: 'q_cardio', title: `كارديو (جري أو مشي سريع): ${cardioMin} دقيقة`, desc: 'رفع كفاءة القلب والتحمل التنفسي دون إجهاد المفاصل', xp: 30, stat: 'agi', targetCount: cardioMin }
+                ],
+                lifestyle: [
+                    { id: 'q_water', title: 'شرب 3 لترات من الماء النقي', desc: 'ترطيب الخلايا وتعزيز الاستشفاء العضلي', xp: 30, stat: 'end' },
+                    { id: 'q_sleep', title: 'النوم العميق لمدة 7 - 8 ساعات', desc: 'إعادة بناء الألياف العضلية وتصفية الذهن', xp: 50, stat: 'int' },
+                    { id: 'q_read', title: 'القراءة أو تعلم مهارة جديدة (30 دقيقة)', desc: 'تطوير الذكاء والانضباط الذهني للصياد', xp: 40, stat: 'int' }
+                ],
+                penaltyTasks: [
+                    { id: 'p_push', title: `عقوبة الضغط المضاعف (+50%): ${Math.ceil(pushups * 1.5)} تكرار`, desc: 'إلزامي للخروج من منطقة الخطر' },
+                    { id: 'p_squat', title: `عقوبة السكوات المضاعف (+50%): ${Math.ceil(squats * 1.5)} تكرار`, desc: 'إلزامي للخروج من منطقة الخطر' },
+                    { id: 'p_detox', title: 'الابتعاد التام عن الترفيه والهاتف لمدة ساعتين', desc: 'إعادة ضبط الدوبامين والانضباط' }
+                ]
+            };
+        }
+
+        // ---------------------------------------------------------------------
+        // 4. إدارة التخزين المحلي (LocalStorage) والإشعارات
+        // ---------------------------------------------------------------------
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error('فشل حفظ البيانات محلياً:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                console.error('خطأ في قراءة البيانات المحفوظة:', e);
+            }
+        }
+
+        let toastTimeout;
+        function showToast(msg, isAlert = false) {
+            const toast = document.getElementById('system-toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = msg;
+            iconEl.className = isAlert ? 'fas fa-skull-crossbones text-red-400' : 'fas fa-bolt text-glow';
+            toast.classList.remove('hidden');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // ---------------------------------------------------------------------
+        // 5. منطق اكتساب الخبرة ورفع المستوى (XP & Level Up)
+        // ---------------------------------------------------------------------
+        function addXP(amount) {
+            const oldLevel = state.hunter.level;
+            const oldRank = getRankInfo(oldLevel).rank;
+
+            state.hunter.xp += amount;
+            if (state.hunter.xp < 0) state.hunter.xp = 0;
+
+            let leveledUp = false;
+            while (state.hunter.level < 100 && state.hunter.xp >= getRequiredXP(state.hunter.level)) {
+                state.hunter.xp -= getRequiredXP(state.hunter.level);
+                state.hunter.level += 1;
+                // زيادة جميع السمات عند ارتفاع المستوى
+                state.hunter.stats.str += 2;
+                state.hunter.stats.end += 2;
+                state.hunter.stats.agi += 2;
+                state.hunter.stats.int += 2;
+                leveledUp = true;
+            }
+
+            if (leveledUp) {
+                AudioFX.playLevelUp();
+                const newRank = getRankInfo(state.hunter.level);
+                document.getElementById('modal-old-lvl').textContent = oldLevel;
+                document.getElementById('modal-new-lvl').textContent = state.hunter.level;
+
+                const rankUpMsg = document.getElementById('modal-rank-up-msg');
+                if (newRank.rank !== oldRank) {
+                    document.getElementById('modal-new-rank').textContent = `${newRank.rank}-Rank (${newRank.title})`;
+                    rankUpMsg.classList.remove('hidden');
+                } else {
+                    rankUpMsg.classList.add('hidden');
+                }
+
+                const modal = document.getElementById('levelup-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // 6. تحديث الواجهة الرسومية (UI Rendering)
+        // ---------------------------------------------------------------------
+        function renderUI() {
+            // التبديل بين شاشة الدخول ولوحة التحكم
+            const authScreen = document.getElementById('auth-screen');
+            const dashScreen = document.getElementById('dashboard-screen');
+
+            if (!state.isLoggedIn) {
+                authScreen.classList.remove('hidden');
+                dashScreen.classList.add('hidden');
+                document.body.classList.remove('penalty-mode');
+
+                // إظهار خيار استعادة الحساب إن كان هناك اسم محفوظ
+                const existingBox = document.getElementById('existing-account-box');
+                if (state.hunter.name) {
+                    existingBox.classList.remove('hidden');
+                    document.getElementById('saved-hunter-preview').textContent = `${state.hunter.name} (LVL ${state.hunter.level})`;
+                } else {
+                    existingBox.classList.add('hidden');
+                }
+                return;
+            }
+
+            authScreen.classList.add('hidden');
+            dashScreen.classList.remove('hidden');
+
+            // تطبيق وضع العقوبة أو الوضع الطبيعي
+            const penaltyPanel = document.getElementById('penalty-zone-panel');
+            const penaltyBadge = document.getElementById('penalty-badge');
+            if (state.penalty.active) {
+                document.body.classList.add('penalty-mode');
+                penaltyPanel.classList.remove('hidden');
+                penaltyBadge.classList.remove('hidden');
+            } else {
+                document.body.classList.remove('penalty-mode');
+                penaltyPanel.classList.add('hidden');
+                penaltyBadge.classList.add('hidden');
+            }
+
+            // تحديث بيانات بطاقة الصياد
+            const rankInfo = getRankInfo(state.hunter.level);
+            const reqXP = getRequiredXP(state.hunter.level);
+            const xpPercent = Math.min(100, Math.round((state.hunter.xp / reqXP) * 100));
+
+            document.getElementById('display-name').textContent = state.hunter.name;
+            document.getElementById('display-title').textContent = rankInfo.title;
+            document.getElementById('display-rank').textContent = rankInfo.rank;
+            document.getElementById('display-level').textContent = state.hunter.level;
+            document.getElementById('streak-count').textContent = state.hunter.streak;
+
+            document.getElementById('current-xp').textContent = state.hunter.xp;
+            document.getElementById('required-xp').textContent = reqXP;
+            document.getElementById('xp-progress-bar').style.width = `${xpPercent}%`;
+
+            // تحديث الإحصائيات الأربعة
+            document.getElementById('stat-str').textContent = state.hunter.stats.str;
+            document.getElementById('stat-end').textContent = state.hunter.stats.end;
+            document.getElementById('stat-agi').textContent = state.hunter.stats.agi;
+            document.getElementById('stat-int').textContent = state.hunter.stats.int;
+
+            // تحديث أيقونة الصوت
+            document.getElementById('sound-icon').className = state.soundEnabled ? 'fas fa-volume-up text-cyan-400' : 'fas fa-volume-mute text-slate-500';
+
+            // رسم سلم الرتب
+            renderRanksList(rankInfo.rank);
+
+            // رسم المهام اليومية ومهام العقوبة
+            renderQuests();
+        }
+
+        function renderRanksList(currentRank) {
+            const container = document.getElementById('ranks-list');
+            container.innerHTML = RANKS_DATA.map(r => {
+                const isCurrent = r.rank === currentRank;
+                return `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl border ${isCurrent ? 'border-cyan-400/70 bg-cyan-950/40 shadow-[0_0_10px_rgba(0,210,255,0.2)]' : 'border-slate-800/80 bg-slate-950/40 opacity-70'}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="font-cyber font-black text-sm w-6 text-center ${r.color}">${r.rank}</span>
+                            <span class="text-slate-200 font-semibold">${r.title}</span>
+                        </div>
+                        <span class="font-cyber text-[11px] text-slate-400">LVL ${r.minLvl}-${r.maxLvl}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderQuests() {
+            const quests = getDynamicQuests(state.hunter.level);
+            const allDaily = [...quests.physical, ...quests.lifestyle];
+
+            // 1. رسم التمارين البدنية
+            const physContainer = document.getElementById('physical-quests-list');
+            physContainer.innerHTML = quests.physical.map(q => createQuestItemHTML(q, false)).join('');
+
+            // 2. رسم مهام نمط الحياة
+            const lifeContainer = document.getElementById('lifestyle-quests-list');
+            lifeContainer.innerHTML = quests.lifestyle.map(q => createQuestItemHTML(q, false)).join('');
+
+            // 3. تحديث شريط تقدم المهام اليومية
+            const completedCount = state.daily.completedIds.length;
+            const totalCount = allDaily.length;
+            const percent = Math.round((completedCount / totalCount) * 100);
+
+            document.getElementById('quest-completion-text').textContent = `${completedCount} / ${totalCount} مكتملة`;
+            document.getElementById('quest-progress-bar').style.width = `${percent}%`;
+
+            // حالة زر إتمام المهمة اليومية
+            const claimBtn = document.getElementById('claim-daily-btn');
+            const claimBtnText = document.getElementById('claim-btn-text');
+
+            if (state.penalty.active) {
+                claimBtn.disabled = true;
+                claimBtnText.textContent = 'المكافآت مجمدة حتى إتمام عقوبة البقاء!';
+            } else if (state.daily.claimedBonus) {
+                claimBtn.disabled = true;
+                claimBtnText.textContent = 'تم إنجاز المهمة اليومية واستلام المكافأة (+150 XP) ✓';
+            } else if (completedCount === totalCount) {
+                claimBtn.disabled = false;
+                claimBtnText.textContent = 'إتمام المهمة اليومية واستلام (+150 XP)!';
+            } else {
+                claimBtn.disabled = true;
+                claimBtnText.textContent = `أكمل جميع المهام (${totalCount - completedCount} متبقية) لاستلام +150 XP`;
+            }
+
+            // 4. رسم مهام العقوبة إذا كانت نشطة
+            if (state.penalty.active) {
+                const penaltyContainer = document.getElementById('penalty-tasks-container');
+                penaltyContainer.innerHTML = quests.penaltyTasks.map(p => createQuestItemHTML(p, true)).join('');
+
+                const allPenaltyDone = quests.penaltyTasks.every(p => state.penalty.completedIds.includes(p.id));
+                document.getElementById('complete-penalty-btn').disabled = !allPenaltyDone;
+            }
+        }
+
+        function createQuestItemHTML(quest, isPenalty) {
+            const isChecked = isPenalty
+                ? state.penalty.completedIds.includes(quest.id)
+                : state.daily.completedIds.includes(quest.id);
+
+            const isDisabled = !isPenalty && (state.daily.claimedBonus || state.penalty.active);
+
+            return `
+                <label class="flex items-center justify-between gap-3 p-3.5 rounded-xl border ${isChecked ? 'border-cyan-500/40 bg-slate-900/40 opacity-75' : 'border-slate-800 bg-slate-950/70 hover:border-slate-600'} transition cursor-pointer select-none">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="quest-checkbox" 
+                            data-id="${quest.id}" 
+                            data-penalty="${isPenalty}" 
+                            ${isChecked ? 'checked' : ''} 
+                            ${isDisabled ? 'disabled' : ''}>
+                        <div>
+                            <div class="text-sm font-bold ${isChecked ? 'line-through text-slate-400' : 'text-white'}">${quest.title}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">${quest.desc}</div>
+                        </div>
+                    </div>
+                    ${!isPenalty ? `<span class="font-cyber text-xs font-bold text-glow shrink-0">+${quest.xp} XP</span>` : `<span class="text-xs font-bold text-red-400 shrink-0">إلزامي</span>`}
+                </label>
+            `;
+        }
+
+        // ---------------------------------------------------------------------
+        // 7. معالجة الأحداث والتفاعلات (Event Listeners)
+        // ---------------------------------------------------------------------
+        document.addEventListener('change', (e) => {
+            if (!e.target.classList.contains('quest-checkbox')) return;
+
+            const id = e.target.getAttribute('data-id');
+            const isPenalty = e.target.getAttribute('data-penalty') === 'true';
+            const checked = e.target.checked;
+
+            if (isPenalty) {
+                if (checked && !state.penalty.completedIds.includes(id)) {
+                    state.penalty.completedIds.push(id);
+                    AudioFX.playCheck();
+                } else if (!checked) {
+                    state.penalty.completedIds = state.penalty.completedIds.filter(item => item !== id);
+                }
+            } else {
+                const quests = getDynamicQuests(state.hunter.level);
+                const questObj = [...quests.physical, ...quests.lifestyle].find(q => q.id === id);
+
+                if (checked && !state.daily.completedIds.includes(id)) {
+                    state.daily.completedIds.push(id);
+                    AudioFX.playCheck();
+                    if (questObj) {
+                        addXP(questObj.xp);
+                        state.hunter.stats[questObj.stat] += 1;
+                        showToast(`تم إنجاز المهمة! (+${questObj.xp} XP)`);
+                    }
+                } else if (!checked) {
+                    state.daily.completedIds = state.daily.completedIds.filter(item => item !== id);
+                    if (questObj) {
+                        state.hunter.xp = Math.max(0, state.hunter.xp - questObj.xp);
+                        state.hunter.stats[questObj.stat] = Math.max(10, state.hunter.stats[questObj.stat] - 1);
+                    }
+                }
+            }
+
+            saveState();
+            renderUI();
+        });
+
+        // نموذج تسجيل الدخول / إنشاء الصياد
+        document.getElementById('awakening-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameVal = document.getElementById('hunter-name-input').value.trim();
+            if (!nameVal) return;
+
+            const tier = document.querySelector('input[name="fitness-tier"]:checked').value;
+            let startLevel = 1;
+            let baseStat = 10;
+
+            if (tier === 'intermediate') {
+                startLevel = 12;
+                baseStat = 22;
+            } else if (tier === 'advanced') {
+                startLevel = 28;
+                baseStat = 40;
+            }
+
+            state.isLoggedIn = true;
+            state.hunter = {
+                name: nameVal,
+                level: startLevel,
+                xp: 0,
+                streak: 0,
+                stats: { str: baseStat, end: baseStat, agi: baseStat, int: baseStat }
+            };
+            state.daily = {
+                dateString: new Date().toDateString(),
+                completedIds: [],
+                claimedBonus: false
+            };
+            state.penalty = { active: false, completedIds: [] };
+
+            AudioFX.playLevelUp();
+            saveState();
+            renderUI();
+            showToast(`مرحباً بك أيها الصياد ${nameVal}! بدأ النظام بالعمل.`);
+        });
+
+        // استعادة الجلسة المحفوظة
+        document.getElementById('resume-session-btn').addEventListener('click', () => {
+            state.isLoggedIn = true;
+            saveState();
+            renderUI();
+            showToast(`تمت استعادة بيانات الصياد ${state.hunter.name}.`);
+        });
+
+        // إتمام المهمة اليومية واستلام +150 XP
+        document.getElementById('claim-daily-btn').addEventListener('click', () => {
+            if (state.daily.claimedBonus || state.penalty.active) return;
+
+            state.daily.claimedBonus = true;
+            state.hunter.streak += 1;
+            AudioFX.playCheck();
+            addXP(150);
+            saveState();
+            renderUI();
+            showToast('مذهل! تم إتمام جميع مهام اليوم (+150 XP إضافية)!');
+        });
+
+        // محاكاة فشل المهمة وتفعيل العقوبة
+        document.getElementById('simulate-fail-btn').addEventListener('click', () => {
+            if (state.penalty.active) {
+                showToast('أنت بالفعل داخل زنزانة العقوبة!', true);
+                return;
+            }
+            state.penalty.active = true;
+            state.penalty.completedIds = [];
+            state.hunter.streak = 0;
+            state.hunter.xp = Math.max(0, state.hunter.xp - 50);
+
+            AudioFX.playAlert();
+            saveState();
+            renderUI();
+            showToast('تحذير: فشلت في إتمام المهام! تم خصم 50 XP وتفعيل زنزانة العقوبة.', true);
+        });
+
+        // إتمام عقوبة البقاء والعودة للوضع الطبيعي
+        document.getElementById('complete-penalty-btn').addEventListener('click', () => {
+            state.penalty.active = false;
+            state.penalty.completedIds = [];
+            AudioFX.playCheck();
+            saveState();
+            renderUI();
+            showToast('لقد نجوت من زنزانة العقوبة! عاد النظام للوضع الطبيعي.');
+        });
+
+        // زر يوم جديد (Reset Daily Quests)
+        document.getElementById('new-day-btn').addEventListener('click', () => {
+            // إذا لم يتم إكمال المهام قبل الانتقال ليوم جديد، يتم تفعيل العقوبة تلقائياً
+            if (!state.daily.claimedBonus && !state.penalty.active) {
+                state.penalty.active = true;
+                state.penalty.completedIds = [];
+                state.hunter.streak = 0;
+                state.hunter.xp = Math.max(0, state.hunter.xp - 50);
+                AudioFX.playAlert();
+                showToast('انتهى اليوم دون إكمال المهام! تم نقلك لزنزانة العقوبة.', true);
+            } else {
+                showToast('بدأ يوم تدريبي جديد! تم تحديث المهام اليومية.');
+            }
+
+            state.daily = {
+                dateString: new Date().toDateString(),
+                completedIds: [],
+                claimedBonus: false
+            };
+
+            saveState();
+            renderUI();
+        });
+
+        // تبديل الصوت
+        document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+            state.soundEnabled = !state.soundEnabled;
+            saveState();
+            renderUI();
+            if (state.soundEnabled) AudioFX.playCheck();
+        });
+
+        // تسجيل الخروج (الاحتفاظ بالبيانات)
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            state.isLoggedIn = false;
+            saveState();
+            renderUI();
+        });
+
+        // إعادة ضبط الحساب بالكامل (بدون استخدام confirm المنبثقة)
+        let resetConfirmStep = false;
+        document.getElementById('reset-account-btn').addEventListener('click', function () {
+            if (!resetConfirmStep) {
+                resetConfirmStep = true;
+                this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>تأكيد الحذف؟</span>';
+                showToast('اضغط مرة أخرى لتأكيد مسح جميع البيانات والبدء من الصفر.', true);
+                setTimeout(() => {
+                    resetConfirmStep = false;
+                    this.innerHTML = '<i class="fas fa-rotate-left"></i> <span class="hidden sm:inline">إعادة ضبط</span>';
+                }, 4000);
+                return;
+            }
+
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        });
+
+        // إغلاق نافذة Level Up
+        document.getElementById('close-levelup-btn').addEventListener('click', () => {
+            const modal = document.getElementById('levelup-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+
+        // ---------------------------------------------------------------------
+        // 8. العداد التنازلي الحي حتى منتصف الليل وفحص تغير اليوم تلقائياً
+        // ---------------------------------------------------------------------
+        function updateMidnightCountdown() {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            const diff = midnight - now;
+
+            const hrs = String(Math.floor((diff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+            const mins = String(Math.floor((diff / 1000 / 60) % 60)).padStart(2, '0');
+            const secs = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+
+            const timerEl = document.getElementById('countdown-timer');
+            if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
+
+            // فحص إذا مر منتصف الليل فعلياً واللاعب مسجل الدخول
+            if (state.isLoggedIn && state.daily.dateString !== now.toDateString()) {
+                if (!state.daily.claimedBonus) {
+                    state.penalty.active = true;
+                    state.penalty.completedIds = [];
+                    state.hunter.streak = 0;
+                    state.hunter.xp = Math.max(0, state.hunter.xp - 50);
+                    AudioFX.playAlert();
+                    showToast('منتصف الليل! فشلت في إتمام مهام الأمس، تم تفعيل زنزانة العقوبة.', true);
+                }
+                state.daily = {
+                    dateString: now.toDateString(),
+                    completedIds: [],
+                    claimedBonus: false
+                };
+                saveState();
+                renderUI();
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // 9. تشغيل النظام عند تحميل الصفحة
+        // ---------------------------------------------------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderUI();
+            updateMidnightCountdown();
+            setInterval(updateMidnightCountdown, 1000);
+        });
+    </script>
+</body>
+</html>
